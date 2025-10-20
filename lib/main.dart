@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget{
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Stock Chart Getx',
-      theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo)),
+      theme: ThemeData.dark(),
       home: const StockChartPage(symbol: 'AAPL', company: 'Apple Inc.'),
     );
   }
