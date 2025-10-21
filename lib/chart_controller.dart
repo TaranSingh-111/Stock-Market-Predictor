@@ -18,13 +18,15 @@ class ChartController extends GetxController{
 
   Timer? _timer;
 
+  final Map<RangeOption, List<Map<String, dynamic>>> _cache = {};
+
   ChartController(this.symbol);
 
   @override
   void onInit(){
     super.onInit();
     fetchData();
-    _timer = Timer.periodic(const Duration(seconds: 1000), (_) => fetchLiveQuote());
+    _timer = Timer.periodic(const Duration(seconds: 200), (_) => fetchLiveQuote());
   }
 
   @override
@@ -35,32 +37,42 @@ class ChartController extends GetxController{
 
   Future<void> fetchData() async{
     isLoading.value = true;
+    final range = selectedRange.value;
+
+    if (_cache.containsKey(range)) {
+      candles.assignAll(_cache[range]!);
+      await fetchLiveQuote(); // still update live price
+      isLoading.value = false;
+      return;
+    }
 
     String interval;
     int outputCount;
 
     switch(selectedRange.value){
       case RangeOption.oneDay:
-        interval = '5min';
-        outputCount = 78;
+        interval = '15min';
+        outputCount = 96;
         break;
       case RangeOption.oneWeek:
-        interval = '30min';
-        outputCount = 78 * 5;
+        interval = '1h';
+        outputCount = 168;
         break;
       case RangeOption.oneMonth:
         interval = '1day';
         outputCount = 30;
         break;
       case RangeOption.oneYear:
-        interval = '1week';
-        outputCount = 52;
+        interval = '1month';
+        outputCount = 12;
         break;
     }
 
     final data = await _service.getCandles(symbol, interval, outputCount);
-    if(data != null)
+    if(data != null){
+      _cache[range] = data;
       candles.assignAll(data);
+    }
     await fetchLiveQuote();
     isLoading.value = false;
   }
@@ -77,60 +89,4 @@ class ChartController extends GetxController{
       fetchData();
     }
   }
-
-  // @override
-  // void onReady(){
-  //   super.onReady();
-  //   fetchLiveQuote('AAPL');
-  //   ever(selectedRange, (_) => fetchLiveQuote('AAPL'));
-  //   _startAutoRefresh();
-  // }
-  // void _startAutoRefresh(){
-  //   Future.doWhile(() async{
-  //     await Future.delayed(const Duration(seconds: 15));
-  //     await fetchLiveQuote('AAPL');
-  //     return true;
-  //   });
-  // }
-  //
-  // late Map<RangeOption, List<Map<String, double>>> _mockData;
-  // List<Map<String, double>> get currentData => _mockData[selectedRange.value]!;
-  // @override
-  // void onInit(){
-  //   super.onInit();
-  //   _mockData ={
-  //     RangeOption.oneDay : _generateMockSeries(points: 78, volatility: 0.7, startPrice: 176.0),
-  //     RangeOption.oneWeek: _generateMockSeries(points: 28, volatility: 1.2, startPrice: 170.0),
-  //     RangeOption.oneMonth: _generateMockSeries(points: 30, volatility: 1.8, startPrice: 160.0),
-  //     RangeOption.oneYear: _generateMockSeries(points: 52, volatility: 3.5, startPrice: 120.0),
-  //     RangeOption.all: _generateMockSeries(points: 120, volatility: 4.0, startPrice: 40.0),
-  //   };
-  //   prepareChart();
-  // }
-  //
-  // List<Map<String, double>> _generateMockSeries({required int points, required double volatility, required double startPrice}){
-  //
-  //   final rnd = Random(42);
-  //   double price = startPrice;
-  //   final now = DateTime.now().toUtc();
-  //   final List<Map<String, double>> series = [];
-  //   for(int i =0; i < points; i++){
-  //     final timeStamp = now.subtract(Duration(minutes: (points-1)*15)).millisecondsSinceEpoch.toDouble();
-  //     final change = (rnd.nextDouble() -0.5) * volatility;
-  //     price =(price + change).clamp(1.0, 100000.0);
-  //     series.add({'t': timeStamp, 'p':double.parse(price.toStringAsFixed(2))});
-  //   }
-  //   return series;
-  // }
-  //
-  // void prepareChart(){
-  //
-  //   final data = currentData;
-  //   spots.value = List.generate(data.length, (i) => FlSpot(i.toDouble(), data[i]['p']!));
-  //   minY.value = spots.map((s) => s.y).reduce(min) * .995;
-  //   maxY.value = spots.map((s) => s.y).reduce(max) * 1.005;
-  //   lastUpdated.value = DateTime.fromMillisecondsSinceEpoch((data.last['t']! * 1000).toInt()).toLocal().toString();
-  // }
-
-
 }
