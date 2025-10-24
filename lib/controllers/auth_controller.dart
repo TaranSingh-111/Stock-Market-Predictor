@@ -25,8 +25,39 @@ class AuthController extends GetxController{
     }
   }
 
+  //Email & password login
+  Future<void> loginWithEmail(String email, String password) async{
+    try{
+      isLoading.value = true;
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+    }
+    on FirebaseAuthException catch(e) {
+      Get.snackbar('Login Error', e.message ?? 'Unknown error');
+    }
+    finally{
+      isLoading.value = false;
+    }
+  }
+
+  //Email & password signup
+  Future<void> createAccount(String email, String password, String name) async{
+    try{
+      isLoading.value = true;
+      final cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+
+      await cred.user?.updateDisplayName(name);
+      await cred.user?.reload();
+    }
+    on FirebaseAuthException catch (e){
+      Get.snackbar('Sign-Up Error', e.message ?? 'Unknown error');
+    }
+    finally{
+      isLoading.value = false;
+    }
+  }
 
 
+//signin with google
   Future<void> signInWithGoogle() async{
     try{
       isLoading.value = true;

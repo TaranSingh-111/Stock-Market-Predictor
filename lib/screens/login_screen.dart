@@ -5,11 +5,14 @@ import 'package:stock_market_predictor/controllers/auth_controller.dart';
 
 
 class LoginScreen extends StatelessWidget{
-  const LoginScreen({super .key});
+  LoginScreen({super .key});
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context){
-    final controller = Get.find<AuthController>();
+    final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -78,12 +81,12 @@ class LoginScreen extends StatelessWidget{
 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 420),
                 child: TextField(
+                  controller: emailController,
                   decoration: InputDecoration(
-                    prefixText: "+91",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    labelText: "Phone number",
+                    labelText: "Email",
                   ),
                 ) ,
               ),
@@ -92,6 +95,8 @@ class LoginScreen extends StatelessWidget{
 
               Padding(padding: const EdgeInsets.only(left: 40, top: 500, right:40),
                 child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
                   decoration: InputDecoration(
                       prefixIcon:Icon( Icons.lock) ,
                       border: OutlineInputBorder(
@@ -124,7 +129,11 @@ class LoginScreen extends StatelessWidget{
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () => Get.offAllNamed('/main'),
+                  onPressed: (){
+                    controller.loginWithEmail(
+                        emailController.text.trim(),
+                        passwordController.text.trim());
+                  },
                   label: const Text("Login",
                       style: TextStyle(color:Colors.white, fontSize: 20)),
                   icon: const Icon(Icons.login, color: Colors.white, size: 25,),

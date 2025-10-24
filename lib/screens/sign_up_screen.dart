@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:stock_market_predictor/controllers/auth_controller.dart';
 import 'package:stock_market_predictor/screens/login_screen.dart';
 
 class SignUpScreen extends StatelessWidget{
-  const SignUpScreen({super.key});
+  SignUpScreen({super.key});
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final AuthController controller = Get.find<AuthController>();
     return Scaffold(
       body: SingleChildScrollView(
         child: SizedBox(
@@ -77,6 +83,7 @@ class SignUpScreen extends StatelessWidget{
 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 345),
                 child: TextField(
+                  controller: nameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -90,11 +97,12 @@ class SignUpScreen extends StatelessWidget{
 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 425),
                 child: TextField(
+                  controller: emailController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    labelText: "Email or phone",
+                    labelText: "Email",
                   ),
                 ) ,
               ),
@@ -103,6 +111,7 @@ class SignUpScreen extends StatelessWidget{
 
               Padding(padding: const EdgeInsets.only(left: 40, top: 505, right:40),
                 child: TextField(
+                  controller: passwordController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -124,7 +133,12 @@ class SignUpScreen extends StatelessWidget{
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: (){},
+                    onPressed: (){
+                      controller.createAccount(
+                          emailController.text.trim(),
+                          passwordController.text.trim(),
+                          nameController.text.trim());
+                    },
                     label: const Text("Sign up",
                         style: TextStyle(color:Colors.white, fontSize: 20)),
                     icon: const Icon(Icons.login, color: Colors.white, size: 25,)
@@ -139,7 +153,7 @@ class SignUpScreen extends StatelessWidget{
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_)=> const LoginScreen()),
+                      MaterialPageRoute(builder: (_)=> LoginScreen()),
                     );
                   } ,
                   icon: Icon(Icons.chevron_left,color:Colors.black, size:75),

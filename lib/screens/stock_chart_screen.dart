@@ -5,11 +5,14 @@ import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:stock_market_predictor/controllers/chart_controller.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:stock_market_predictor/controllers/watchlist_controller.dart';
 
 class StockChartScreen extends StatelessWidget {
   final String symbol;
   final String company;
-  const StockChartScreen({super.key, required this.symbol, required this.company});
+  StockChartScreen({super.key, required this.symbol, required this.company});
+
+  final WatchlistController watchlistController = Get.find<WatchlistController>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,33 +64,35 @@ class StockChartScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Container(
-                  height: screenHeight * 0.5,
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-
-                      Column(
+                child: Stack(
+                  children: [
+                    Container(
+                      height: screenHeight * 0.5,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //company
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              company,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
 
-                          //symbol
-                          Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //company
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  company,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+
+                              //symbol
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
                                   symbol,
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -95,126 +100,153 @@ class StockChartScreen extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
 
                                   ),
+                                ),
                               ),
-                          ),
 
 
-                          //price
-                          const SizedBox(height: 6),
-                          Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                            '\$${controller.currentPrice.value.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: HexColor('7DFDFE'),
-                              fontSize: 26,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          ),
-
-                          //change
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Builder(
-                              builder: (_) {
-                                if (data == null) return const Text("-", style: TextStyle(color: Colors.white));
-
-                                final change = data.change;
-                                final pctChange = data.pctChange;
-
-                                // Determine color based on positive or negative
-                                final isPositive = change >= 0;
-                                final color = isPositive ? Colors.greenAccent[400] : HexColor('ED0808');
-
-                                // Add + sign if positive
-                                final sign = isPositive ? "+" : "-";
-
-                                return Text(
-                                  "$sign${change.toStringAsFixed(2)} ($sign${pctChange.toStringAsFixed(2)}%)",
+                              //price
+                              const SizedBox(height: 6),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  '\$${controller.currentPrice.value.toStringAsFixed(2)}',
                                   style: TextStyle(
-                                    color: color,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    color: HexColor('7DFDFE'),
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                );
-                              },
+                                ),
+                              ),
+
+                              //change
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Builder(
+                                  builder: (_) {
+                                    if (data == null) return const Text("-", style: TextStyle(color: Colors.white));
+
+                                    final change = data.change;
+                                    final pctChange = data.pctChange;
+
+                                    // Determine color based on positive or negative
+                                    final isPositive = change >= 0;
+                                    final color = isPositive ? Colors.greenAccent[400] : HexColor('ED0808');
+
+                                    // Add + sign if positive
+                                    final sign = isPositive ? "+" : "-";
+
+                                    return Text(
+                                      "$sign${change.toStringAsFixed(2)} ($sign${pctChange.toStringAsFixed(2)}%)",
+                                      style: TextStyle(
+                                        color: color,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+
+
+                            ],
+                          ),
+
+                          //Line Chart
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: LineChart(
+                                LineChartData(
+                                  gridData: const FlGridData(show: false),
+                                  titlesData: const FlTitlesData(show: false),
+                                  borderData: FlBorderData(show: false),
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: chartSpots,
+                                      isCurved: true,
+                                      color: HexColor('7DFDFE'),
+                                      barWidth: 2.5,
+                                      dotData: const FlDotData(show: false),
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            HexColor('7DFDFE').withOpacity(0.5),
+                                            Colors.transparent
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
 
+                          SizedBox(height: 20,),
+                          //Range Selector
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: RangeOption.values.map((r) {
+                              final label = switch (r) {
+                                RangeOption.threeHours => '3H',
+                                RangeOption.oneDay => '1D',
+                                RangeOption.oneWeek => '1W',
+                                RangeOption.oneMonth => '1M',
+                                RangeOption.threeMonths => '3M',
+                                RangeOption.oneYear => '1Y',
+                              };
+                              final selected = controller.selectedRange.value == r;
+                              return ChoiceChip(
+                                label: Text(label),
+                                selected: selected,
+                                showCheckmark: false,
+                                onSelected: (_) => controller.changeRange(r),
+                                selectedColor: HexColor('7DFDFE'),
+                                backgroundColor: HexColor('181818'),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(color: Colors.transparent)),
+
+                                labelStyle: TextStyle(
+                                  color: selected ? Colors.black : Colors.white70,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            }).toList(),
+                          ),
 
                         ],
                       ),
-
-                      //Line Chart
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: LineChart(
-                            LineChartData(
-                              gridData: const FlGridData(show: false),
-                              titlesData: const FlTitlesData(show: false),
-                              borderData: FlBorderData(show: false),
-                              lineBarsData: [
-                                LineChartBarData(
-                                  spots: chartSpots,
-                                  isCurved: true,
-                                  color: HexColor('7DFDFE'),
-                                  barWidth: 2.5,
-                                  dotData: const FlDotData(show: false),
-                                  belowBarData: BarAreaData(
-                                    show: true,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        HexColor('7DFDFE').withOpacity(0.5),
-                                        Colors.transparent
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                        child: Obx((){
+                          final isInList = watchlistController.isInWatchlist(symbol);
+                          return IconButton(
+                            icon: Icon(
+                              isInList ? Icons.star : Icons.star_border,
+                              color: isInList ? Colors.yellowAccent : Colors.white,
+                              size: 30,
                             ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 20,),
-                      //Range Selector
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: RangeOption.values.map((r) {
-                          final label = switch (r) {
-                            RangeOption.threeHours => '3H',
-                            RangeOption.oneDay => '1D',
-                            RangeOption.oneWeek => '1W',
-                            RangeOption.oneMonth => '1M',
-                            RangeOption.threeMonths => '3M',
-                            RangeOption.oneYear => '1Y',
-                          };
-                          final selected = controller.selectedRange.value == r;
-                          return ChoiceChip(
-                            label: Text(label),
-                            selected: selected,
-                            showCheckmark: false,
-                            onSelected: (_) => controller.changeRange(r),
-                            selectedColor: HexColor('7DFDFE'),
-                            backgroundColor: HexColor('181818'),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.transparent)),
-
-                            labelStyle: TextStyle(
-                              color: selected ? Colors.black : Colors.white70,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            onPressed: () {
+                              if (isInList) {
+                                watchlistController.removeStock(symbol);
+                                Get.snackbar("Removed", "$company removed from watchlist");
+                              } else {
+                                watchlistController.addStock(symbol, company);
+                                Get.snackbar("Added", "$company added to watchlist");
+                              }
+                            },
                           );
-                        }).toList(),
-                      ),
-
-                    ],
-                  ),
+                        })
+                    )
+                  ],
                 ),
+
+
               ),
 
 

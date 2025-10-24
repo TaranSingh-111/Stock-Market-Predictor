@@ -54,6 +54,7 @@ class StockService{
 
         if (data != null) {
           return StockData(
+
             change: parseDouble(data['change']),
             pctChange: parseDouble(['percents_change']),
 

@@ -10,7 +10,7 @@ class MainController extends GetxController{
   var selectedIndex = 0.obs;
 
   final screens = [
-    const WatchlistScreen(),
+    WatchlistScreen(),
     const StockSearchScreen(),
     const StockNewsScreen(),
     const ProfileScreen(),
