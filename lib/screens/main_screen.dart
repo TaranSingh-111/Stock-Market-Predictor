@@ -35,15 +35,16 @@ class MainScreen extends StatelessWidget{
       bottomNavigationBar: Obx(() => BottomNavigationBar(
         currentIndex: controller.selectedIndex.value,
         onTap: controller.onItemTapped,
+        iconSize: 35,
         backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
+        selectedItemColor: HexColor('7DFDFE'),
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt_rounded), label: 'Watchlist'),
-          BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.newspaper_rounded), label: 'News'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile')
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt_rounded), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.newspaper_rounded), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '')
         ]
       )),
     );

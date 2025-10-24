@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:stock_market_predictor/controllers/news_controller.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class StockNewsScreen extends StatelessWidget{
   const StockNewsScreen({super.key});
@@ -46,7 +47,7 @@ class StockNewsScreen extends StatelessWidget{
       body: Obx((){
 
         final news = controller.newsList;
-        return ListView.builder(
+        return ListView.separated(
             itemCount: news.length,
             itemBuilder: (context, index){
               final article = news[index];
@@ -109,7 +110,20 @@ class StockNewsScreen extends StatelessWidget{
                   ),
                 ),
               );
-            }
+            },
+          separatorBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              height: 3, // thickness of the line
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [HexColor('7DFDFE').withOpacity(0.3), Colors.white], // gradient colors
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+              ),
+            ),
+          ),
         );
       })
     );

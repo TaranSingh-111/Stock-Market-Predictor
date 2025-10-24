@@ -19,6 +19,7 @@ void main () async {
   Get.put(WatchlistController());
 
   runApp(GetMaterialApp(
+    theme: ThemeData.dark(),
     debugShowCheckedModeBanner: false,
     initialRoute: '/login',
     getPages: [

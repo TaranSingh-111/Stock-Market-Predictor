@@ -4,9 +4,18 @@ import 'package:stock_market_predictor/stock_data.dart';
 
 class StockService{
   static const String _baseUrl = 'https://api.twelvedata.com';
-  static const String _apiKey = 'e4418ed3031b40c395ffa9a98dea363e';
+  final apiKeys = ['e4418ed3031b40c395ffa9a98dea363e', '68203d9da1414d2da68d87c2f9e87dea'];
+  int currentKeyIndex = 0;
+
+
+  String getNextApiKey() {
+    String key = apiKeys[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; // cycles through 0–2
+    return key;
+  }
 
   Future<double?> getQuote(String symbol) async{
+    final _apiKey = getNextApiKey();
     final url = Uri.parse('$_baseUrl/quote?symbol=$symbol&apikey=$_apiKey');
     print(url);
     final res = await http.get(url);
@@ -20,6 +29,7 @@ class StockService{
   }
 
   Future<List<Map<String, dynamic>>?> getCandles(String symbol, String interval, int outputCount) async{
+    final _apiKey = getNextApiKey();
     final url = Uri.parse('$_baseUrl/time_series?symbol=$symbol&interval=$interval&outputsize=$outputCount&apikey=$_apiKey');
     print(url);
     final res = await http.get(url);
@@ -45,6 +55,7 @@ class StockService{
 
   Future<StockData?> getStockData(String symbol) async{
     try {
+      final _apiKey = getNextApiKey();
       final url = Uri.parse('$_baseUrl/quote?symbol=$symbol&apikey=$_apiKey');
       print(url);
       final res = await http.get(url);

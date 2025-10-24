@@ -48,6 +48,8 @@ class _WatchlistScreenState extends State<WatchlistScreen>{
             itemBuilder: (context, index) {
               final stock = controller.watchlist[index];
               return Card(
+                elevation: 3,
+                shadowColor: HexColor('7DFDFE'),
                 color: Colors.grey[900],
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(

@@ -17,6 +17,7 @@ class StockSearchScreen extends StatelessWidget{
       appBar: AppBar(
         title: const Text('Search Stocks', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
+
       ),
       body: Column(
         children: [
@@ -24,12 +25,13 @@ class StockSearchScreen extends StatelessWidget{
               padding: const EdgeInsets.all(8),
               child: TextField(
                 style: const TextStyle(color: Colors.white),
+                cursorColor: HexColor('7DFDFE'),
                 decoration: InputDecoration(
                   hintText: 'Search stock by name or symbol...',
                   hintStyle: TextStyle(color:  Colors.white),
                   filled: true,
                   fillColor: Colors.grey[900],
-                  prefixIcon: const Icon(Icons.search, color: Colors.white),
+                  prefixIcon: Icon(Icons.search, color: HexColor('7DFDFE')),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none
@@ -47,18 +49,24 @@ class StockSearchScreen extends StatelessWidget{
                     );
                   }
 
-                  return ListView.builder(
+                  return ListView.separated(
                     itemCount: controller.stocks.length,
                     itemBuilder:  (context, index){
                       final stock = controller.stocks[index];
                       return ListTile(
                         title: Text(stock.name, style: TextStyle(color: Colors.white)),
-                        subtitle: Text(stock.symbol, style: TextStyle(color: HexColor('181818'))),
+                        subtitle: Text(stock.symbol, style: TextStyle(color: Colors.grey[400])),
                         onTap: (){
                             Get.to(StockChartScreen(symbol: stock.symbol, company: stock.name));
                         },
                       );
-                    }
+                    },
+                    separatorBuilder: (context, index){
+                      return Container(
+                        height: 2,
+                        color: HexColor('7DFDFE').withOpacity(0.3),
+                      );
+                    },
                   );
                 }
               )
