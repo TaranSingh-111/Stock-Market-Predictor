@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "824244528633",
+    "project_id": "stockmarketpredictor-7e6d9",
+    "storage_bucket": "stockmarketpredictor-7e6d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824244528633:android:4094c8b2e8bdaa85ce8928",
+        "android_client_info": {
+          "package_name": "com.example.stock_market_predictor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsw8uIBVbi1oT2B-gVVc_blXWcxfVfpPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,9 +3,10 @@ import 'dart:async';
 import 'dart:math';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:stock_market_predictor/stock_service.dart';
+import 'package:stock_market_predictor/services/stock_service.dart';
+import 'package:stock_market_predictor/stock_data.dart';
 
-enum RangeOption { oneDay, oneWeek, oneMonth, oneYear}
+enum RangeOption { threeHours, oneDay, oneWeek, oneMonth, threeMonths, oneYear}
 
 class ChartController extends GetxController{
   final String symbol;
@@ -13,6 +14,7 @@ class ChartController extends GetxController{
 
   var candles = <Map<String, dynamic>>[].obs;
   var currentPrice =0.0.obs;
+  var stockData = Rx<StockData?>(null);
   var isLoading = false.obs;
   var selectedRange = RangeOption.oneMonth.obs;
 
@@ -26,7 +28,7 @@ class ChartController extends GetxController{
   void onInit(){
     super.onInit();
     fetchData();
-    _timer = Timer.periodic(const Duration(seconds: 200), (_) => fetchLiveQuote());
+    _timer = Timer.periodic(const Duration(seconds: 1000), (_) => fetchLiveQuote());
   }
 
   @override
@@ -50,21 +52,28 @@ class ChartController extends GetxController{
     int outputCount;
 
     switch(selectedRange.value){
+      case RangeOption.threeHours:
+        interval = '1min';
+        outputCount = 180;
+        break;
       case RangeOption.oneDay:
-        interval = '15min';
-        outputCount = 96;
+        interval = '5min';
+        outputCount = 78;
         break;
       case RangeOption.oneWeek:
         interval = '1h';
-        outputCount = 168;
+        outputCount = 7;
         break;
       case RangeOption.oneMonth:
-        interval = '1day';
-        outputCount = 30;
+        interval = '1h';
+        outputCount = 500;
         break;
+      case RangeOption.threeMonths:
+        interval = "4h";
+        outputCount = 800;
       case RangeOption.oneYear:
-        interval = '1month';
-        outputCount = 12;
+        interval = '1day';
+        outputCount = 365;
         break;
     }
 
@@ -75,12 +84,20 @@ class ChartController extends GetxController{
     }
     await fetchLiveQuote();
     isLoading.value = false;
+
+    await fetchStockDetails();
   }
 
   Future<void> fetchLiveQuote() async{
     final price = await _service.getQuote(symbol);
     if(price != null)
       currentPrice.value = price;
+  }
+
+  Future<void> fetchStockDetails() async{
+    final details = await _service.getStockData(symbol);
+    if(details != null)
+      stockData.value = details;
   }
 
   void changeRange(RangeOption range){

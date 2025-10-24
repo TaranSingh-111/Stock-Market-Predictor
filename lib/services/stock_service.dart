@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:stock_market_predictor/stock_data.dart';
 
 class StockService{
   static const String _baseUrl = 'https://api.twelvedata.com';
@@ -40,6 +41,53 @@ class StockService{
       }
     }
     return null;
+  }
+
+  Future<StockData?> getStockData(String symbol) async{
+    try {
+      final url = Uri.parse('$_baseUrl/quote?symbol=$symbol&apikey=$_apiKey');
+      print(url);
+      final res = await http.get(url);
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+
+        if (data != null) {
+          return StockData(
+            change: parseDouble(data['change']),
+            pctChange: parseDouble(['percents_change']),
+
+            exchange: data['exchange'] ?? '-',
+            currency: data['currency'] ?? '-',
+            open: parseDouble(data['open']),
+            high: parseDouble(data['high']),
+            low: parseDouble(data['low']),
+            prevClose: parseDouble(data['previous_close']),
+            high52: parseDouble(data['fifty_two_week']['high']),
+            low52: parseDouble(data['fifty_two_week']['low']),
+            dividend: parseDouble(data['dividend']),
+            qtrDivAmt: parseDouble(data['qtrDivAmt']),
+
+          );
+        }
+      }
+      print("getStockData: API returned ${res.statusCode} or null data");
+    }catch (e){
+      print("getStockData error: $e");
+    }
+
+    return null;
+  }
+
+  double parseDouble(dynamic value){
+    if(value == null)return 0.0;
+    if(value is num) return value.toDouble();
+    try{
+      return double.parse(value.toString());
+    }
+    catch(e){
+      return 0.0;
+    }
   }
 }
 
