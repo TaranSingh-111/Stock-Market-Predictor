@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthController extends GetxController{
   final FirebaseAuth _auth =  FirebaseAuth.instance;
@@ -74,7 +75,9 @@ class AuthController extends GetxController{
         idToken: googleAuth.idToken
       );
 
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+      await createUserPortfolioIfNotExists(userCredential.user!.uid);
+
       Get.offAllNamed('/main');
     }
     catch(e){
@@ -93,6 +96,31 @@ class AuthController extends GetxController{
     }
     catch (e){
       print('Sign-out error: $e');
+    }
+  }
+
+
+  //portfolio creation
+  Future<void> createUserPortfolioIfNotExists(String uid) async {
+    try {
+      final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final doc = await docRef.get();
+
+      print("Checking if portfolio exists for user: $uid");
+
+      if (!doc.exists) {
+        print("Creating new portfolio...");
+        await docRef.set({
+          'balance': 50000,
+          'totalInvestment': 0,
+          'holdings': [],
+        });
+        print("Portfolio created successfully!");
+      } else {
+        print("Portfolio already exists.");
+      }
+    } catch (e) {
+      print("Error creating portfolio: $e");
     }
   }
 }

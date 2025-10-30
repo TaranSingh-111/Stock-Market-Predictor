@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:ui';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:stock_market_predictor/controllers/chart_controller.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:stock_market_predictor/controllers/watchlist_controller.dart';
+import 'package:stock_market_predictor/controllers/portfolio_controller.dart';
 
 class StockChartScreen extends StatelessWidget {
   final String symbol;
@@ -13,6 +14,7 @@ class StockChartScreen extends StatelessWidget {
   StockChartScreen({super.key, required this.symbol, required this.company});
 
   final WatchlistController watchlistController = Get.find<WatchlistController>();
+  final PortfolioController portfolioController = Get.find<PortfolioController>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ class StockChartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(backgroundColor: Colors.black),
       body: Obx(() {
         if (controller.candles.isEmpty) {
@@ -50,7 +53,7 @@ class StockChartScreen extends StatelessWidget {
           children: [
             // Main scrollable content
             SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 100), // space for button
+              padding: const EdgeInsets.only(bottom: 120), // space for button
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -65,7 +68,7 @@ class StockChartScreen extends StatelessWidget {
                     child: Stack(
                       children: [
                         Container(
-                          height: screenHeight * 0.5,
+                          height: screenHeight * 0.48,
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,7 +104,7 @@ class StockChartScreen extends StatelessWidget {
                                     final isPositive = change >= 0;
                                     final color = isPositive
                                         ? Colors.greenAccent[400]
-                                        : HexColor('ED0808');
+                                        : Colors.redAccent[400];
                                     final sign = isPositive ? "+" : "";
                                     return Text(
                                       "$sign${change.toStringAsFixed(2)} ($sign${pctChange.toStringAsFixed(2)}%)",
@@ -259,10 +262,69 @@ class StockChartScreen extends StatelessWidget {
               ),
             ),
 
-            // Predict Button stays fixed (doesn't scroll away)
+            // SizedBox(height: ),
+
+
+
             Positioned(
-              bottom: 30,
+              bottom: 10,
               right: 20,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // buy button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent[400],
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 43, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 4,
+                      shadowColor: Colors.greenAccent.withOpacity(0.8),
+                    ),
+                    onPressed: () {
+                      _showTradeDialog(context, 'BUY', symbol, company, controller.currentPrice.value );
+                    },
+                    child: const Text(
+                      "BUY",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+                  //sell button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent[400],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 4,
+                      shadowColor: Colors.redAccent.withOpacity(0.8),
+                    ),
+                    onPressed: () {
+                      _showTradeDialog(context, 'SELL', symbol, company, controller.currentPrice.value);
+                    },
+                    child: const Text(
+                      "SELL",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+
+                ],
+              )
+            ),
+
+
+            // Predict Button
+            Positioned(
+              bottom: 40,
+              left: 20,
               child: GestureDetector(
                 onTap: () {
                   Get.snackbar("Predict", "Prediction feature coming soon!");
@@ -319,5 +381,97 @@ class StockChartScreen extends StatelessWidget {
       ],
     );
     return SizedBox(height: 20);
+  }
+
+  void _showTradeDialog(BuildContext context, String action, String symbol, String company, double price) {
+    final TextEditingController quantityController = TextEditingController();
+    
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1C1C1C),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "$action Stock",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: action == "BUY" ? Colors.greenAccent : Colors.redAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Enter Quantity",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white24),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: action == "BUY"
+                          ? Colors.greenAccent
+                          : Colors.redAccent,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: action == "BUY"
+                      ? Colors.greenAccent.shade400
+                      : Colors.redAccent.shade400,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  final text = quantityController.text.trim();
+                  if (text.isEmpty) {
+                    Get.snackbar("Empty", "Please enter a quantity");
+                    return;
+                  }
+
+                  final int? quantity = int.tryParse(text);
+
+                  if (quantity == null || quantity <= 0) {
+                    Get.snackbar("Invalid", "Enter a valid quantity");
+                    return;
+                  }
+                  
+                  
+                  
+                  if(action == "BUY"){
+                    portfolioController.buyStock(symbol, company, price, quantity );
+                  }
+                  else{
+                    portfolioController.sellStock(symbol, price, quantity);
+                  }
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  action == "BUY" ? "Confirm Purchase" : "Confirm Sell",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stock_market_predictor/controllers/auth_controller.dart';
+import 'package:stock_market_predictor/controllers/portfolio_controller.dart';
 
 class ProfileScreen extends StatelessWidget{
   const ProfileScreen({super.key});
@@ -11,6 +12,7 @@ class ProfileScreen extends StatelessWidget{
   Widget build(BuildContext context){
     final user = FirebaseAuth.instance.currentUser;
     final controller = Get.find<AuthController>();
+    final portfolioController = Get.find<PortfolioController>();
 
     final photo = user?.photoURL;
 
@@ -51,6 +53,43 @@ class ProfileScreen extends StatelessWidget{
             ),
 
             const SizedBox(height: 30),
+
+            Obx(() => Card(
+              color:  Colors.grey[900],
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: HexColor('7DFDFE'), width: 1.2),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Current Balance",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "₹${portfolioController.balance.value.toStringAsFixed(2)}",
+                      style: TextStyle(
+                        color: HexColor('7DFDFE'),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+
+            SizedBox(height: 40),
+
 
             //LogoutButton
             SizedBox(
